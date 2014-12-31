@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <string.h>
 #include <Adafruit_NeoPixel.h>
-#include "wifiCredentials.h"
+#include "wifiCredentials.h" //defines WLAN_SSID, WLAN_PASS, WLAN_SECURITY
 
 #define ADAFRUIT_CC3000_IRQ   3              // MUST be an interrupt pin!
 #define ADAFRUIT_CC3000_VBAT  5              // any pin
