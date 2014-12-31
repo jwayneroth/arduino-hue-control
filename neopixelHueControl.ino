@@ -38,9 +38,12 @@ int blue = 255;
 #define BTN_2 6
 #define BTN_3 7
 #define BTN_4 8
-#define NUM_BUTTONS 4
+#define BTN_5 A2
+#define NUM_BUTTONS 5
 
-int buttons[] = {BTN_1, BTN_2, BTN_3, BTN_4};
+int buttons[] = {BTN_1, BTN_2, BTN_3, BTN_4, BTN_5};
+
+#define HUE_TOGGLE A3
 
 #define BUSY_LED A0
 #define ERROR_LED A1
@@ -80,24 +83,29 @@ void loop(void) {
 	
 	checkHueModeChange();
 	
-	if(checkButtons() && hueMode == true) {
+	int button = checkButtons();
+	
+	if(button) {
 		
-		setBusyLED(1);
+		if(hueMode == true) {
 		
-		if( updateHue(red, green, blue, brightness) ) {
+			setBusyLED(1);
+		
+			if( updateHue(red, green, blue, brightness) ) {
 			
-			setErrorLED(0);
+				setErrorLED(0);
 			
-		}else{
+			}else{
 		
-			setErrorLED(1);
+				setErrorLED(1);
+		
+			}
+		
+			setBusyLED(0);
 		
 		}
-		
-		setBusyLED(0);
-		
 	}
-	
+		
   delay(100);
   
 }
