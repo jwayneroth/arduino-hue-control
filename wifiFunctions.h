@@ -17,59 +17,67 @@ char timedRead(Adafruit_CC3000_Client& client) {
 */
 bool findUntil( Adafruit_CC3000_Client& client, char *target, char *terminator ) {
 	
-	size_t targetLen = strlen(target);
-	size_t termLen = strlen(terminator);
+	while (client.available()) {
 	
-	size_t index = 0;  // maximum target string length is 64k bytes!
-	size_t termIndex = 0;
-	char c;
+		size_t targetLen = strlen(target);
+		size_t termLen = strlen(terminator);
 	
-	//Serial.print("targetLen : ");Serial.println(targetLen);
+		size_t index = 0;  // maximum target string length is 64k bytes!
+		size_t termIndex = 0;
+		char c;
 	
-	if( *target == 0) return true;   // return true if target is a null string
+		//Serial.print("targetLen : ");Serial.println(targetLen);
 	
-	while(( c = timedRead(client) ) > 0 ) {
+		if( *target == 0) return true;   // return true if target is a null string
+	
+		while(( c = timedRead(client) ) > 0 ) {
 		
-		//Serial.print(c);
+			//Serial.print(c);
 		
-		if(c != target[index]) {
-			//Serial.println("no match");
-			index = 0; // reset index if any char does not match
-		}
+			if(c != target[index]) {
+				//Serial.println("no match");
+				index = 0; // reset index if any char does not match
+			}
 		
-		if( c == target[index]) {
-			//Serial.print("found ");Serial.print(target[index]);Serial.print(" at ");Serial.println(index);
-			if(++index >= targetLen){ // return true if all chars in the target match
-				return true;
+			if( c == target[index]) {
+				//Serial.print("found ");Serial.print(target[index]);Serial.print(" at ");Serial.println(index);
+				if(++index >= targetLen){ // return true if all chars in the target match
+					return true;
+				}
+			}
+	
+			if(termLen > 0 && c == terminator[termIndex]){
+				if(++termIndex >= termLen) {
+					Serial.println("hit terminator");
+					return false;       // return false if terminate string found before target string
+				}
+			} else {
+				termIndex = 0;
 			}
 		}
 	
-		if(termLen > 0 && c == terminator[termIndex]){
-			if(++termIndex >= termLen) {
-				Serial.println("hit terminator");
-				return false;       // return false if terminate string found before target string
-			}
-		} else {
-			termIndex = 0;
-		}
+		return 0;
+	
 	}
 	
 	return false;
-	
 }
 
 /*
  * readStringUntil
 */
 String readStringUntil( Adafruit_CC3000_Client& client, char terminator) {
-  String ret;
-  int c = timedRead(client);
-  while (c >= 0 && c != terminator)
-  {
-    ret += (char)c;
-    c = timedRead(client);
-  }
-  return ret;
+  while(client.available()) {
+  	String ret;
+  	int c = timedRead(client);
+  	while (c >= 0 && c != terminator)
+  	{
+  	  ret += (char)c;
+  	  c = timedRead(client);
+  	}
+  	return ret;
+	}
+	return 0;
 }
 
 /**************************************************************************/

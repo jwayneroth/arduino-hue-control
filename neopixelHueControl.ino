@@ -103,13 +103,13 @@ void loop(void) {
 				incrementBrightness();
 				break;
 			case 5:
-				if(hueMode) switchHueLightNumber();
+				if(hueMode == true) switchHueLightNumber();
 				break;
 			default:
 				break;
 		}
 
-		if(hueMode == true) {
+		if(hueMode == true && button < 5) {
 		
 			setBusyLED(1);
 		
@@ -120,7 +120,12 @@ void loop(void) {
 			}else{
 		
 				setErrorLED(1);
-		
+				
+				//try again (uuggh)
+				if( updateHue(red, green, blue, brightness) ) {
+					setErrorLED(0);
+				}
+			
 			}
 		
 			setBusyLED(0);
@@ -185,13 +190,44 @@ void checkHueModeChange() {
 }
 
 void switchHueLightNumber() {
+	
+	Serial.print("switchHueLightNumber ");
+	
 	if(hueLightNumber == 1) {
 		hueLightNumber = 2;
-		apeHueLight();
 	}else{
 		hueLightNumber = 1;
-		apeHueLight();
 	}
+
+	Serial.println(hueLightNumber);
+
+	setBusyLED(1);
+		
+	if( getHueLightStatus() ) {
+			
+		delay(100);
+			
+		apeHueLight();
+			
+	}else{
+			
+		setErrorLED(1);
+		
+		//try again please (this is a cruddy fix)
+		if( getHueLightStatus() ) {
+			
+			delay(100);
+			
+			apeHueLight();
+			
+			setErrorLED(0);
+		
+		}
+	
+	}
+	
+	setBusyLED(0);
+
 }
 
 void setBusyLED( byte onoff ) {

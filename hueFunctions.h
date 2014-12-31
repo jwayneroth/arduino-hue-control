@@ -207,22 +207,28 @@ boolean getHueLightStatus() {
 				//Serial.print("hueHue : ");Serial.println(hueHue);
 				Serial.print("hueCIEX : ");Serial.println(hueCIEX);
 				Serial.print("hueCIEY : ");Serial.println(hueCIEY);
-
-				break;
+				
+				while (client.available()) {
+					char c = client.read();
+					//Serial.print(c);
+					//lastRead = millis();
+				}
+			
+				client.close();
+				return 1;
 				
 			}
 		}
-		//*/
+		
 		client.close();
-		//Serial.println(F("-------------------------------------"));
 
 	} else {
-		
-		//Serial.println(F("Connection to Hue failed"));    
+		Serial.println(F("Connection to Hue failed"));    
 		return 0;
 	}
 
-	return 1;
+	return 0;
+
 }
 
 /*
