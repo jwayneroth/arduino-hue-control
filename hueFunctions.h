@@ -158,7 +158,7 @@ boolean getHueLightStatus() {
 		
 	if (client.connected()) {
 
-		client.fastrprint(F("GET "));client.fastrprint(HUE_LIGHT_URL);client.fastrprint(F(" HTTP/1.1\r\n"));
+		client.fastrprint(F("GET "));client.fastrprint(HUE_LIGHT_URL);client.print(hueLightNumber);client.fastrprint(F(" HTTP/1.1\r\n"));
 		client.fastrprint(F("Host: ")); client.fastrprint(HUE_IP_STRING); client.fastrprint(F("\r\n"));
 		client.fastrprint(F("Content-type: application/json\r\n"));
 		client.fastrprint(F("keep-alive\r\n"));
@@ -269,6 +269,7 @@ boolean updateHue(int red, int green, int blue, int brightness) {
 			
 			client.fastrprint(F("PUT "));
 			client.fastrprint(HUE_LIGHT_URL);
+			client.print(hueLightNumber);
 			client.fastrprint(F("/state"));
 			client.fastrprint(F(" HTTP/1.1\r\n"));
 			

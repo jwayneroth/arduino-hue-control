@@ -17,7 +17,7 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(    // On an UNO, SCK = 13, MISO = 12, 
 ); 
 
 #define HUE_IP_STRING   "192.168.2.16"
-#define HUE_LIGHT_URL   "/api/jwayneroth/lights/1"
+#define HUE_LIGHT_URL   "/api/jwayneroth/lights/"
 #define IDLE_TIMEOUT_MS 3000
 
 uint32_t HUE_IP = cc3000.IP2U32(192,168,2,16);
@@ -49,13 +49,13 @@ int buttons[] = {BTN_1, BTN_2, BTN_3, BTN_4, BTN_5};
 #define ERROR_LED A1
 
 boolean hueOn; 
+int hueLightNumber = 1;
 int hueBrightness; 
 long hueHue;  
 String hueCmd; 
 float hueCIEX;
 float hueCIEY;
-boolean hueMode = true;
-boolean hueModeLast = false;
+boolean hueMode = false;
 
 #include "wifiFunctions.h"
 #include "hueFunctions.h"
@@ -74,6 +74,8 @@ void setup(void) {
 	
 	initButtons();
 	
+	pinMode(HUE_TOGGLE, INPUT);
+	
 	pinMode(BUSY_LED, OUTPUT);
 	pinMode(ERROR_LED, OUTPUT);
 
@@ -87,6 +89,26 @@ void loop(void) {
 	
 	if(button) {
 		
+		switch(button) {
+			case 1:
+				incrementRed();
+				break;
+			case 2:
+				incrementGreen();
+				break;
+			case 3:
+				incrementBlue();
+				break;
+			case 4:
+				incrementBrightness();
+				break;
+			case 5:
+				if(hueMode) switchHueLightNumber();
+				break;
+			default:
+				break;
+		}
+
 		if(hueMode == true) {
 		
 			setBusyLED(1);
@@ -114,11 +136,11 @@ void checkHueModeChange() {
 	
 	//hueMode turned on
 	//open wifi
-	if(hueMode == true && hueModeLast == false) {
+	if(hueMode == false && digitalRead(HUE_TOGGLE) == HIGH) {
 		
 		Serial.println("hueMode turned on!");
 		
-		hueModeLast = true;
+		hueMode = true;
 		
 		setBusyLED(1);
 		
@@ -146,9 +168,9 @@ void checkHueModeChange() {
 	
 	//hueMode turned off
 	//close wifi
-	} else if(hueMode == false && hueModeLast == true) {
+	} else if(hueMode == true && digitalRead(HUE_TOGGLE) == LOW) {
 			
-			hueModeLast = false;
+			hueMode = false;
 			
 			Serial.println(F("\nDisconnecting"));
 			
@@ -157,8 +179,17 @@ void checkHueModeChange() {
 			setBusyLED(0);
 			setErrorLED(0);
 			
+			delay(100);
 	}  
 	
+}
+
+void switchHueLightNumber() {
+	if(hueLightNumber == 1) {
+		hueLightNumber = 2;
+	}else{
+		hueLightNumber = 1;
+	}
 }
 
 void setBusyLED( byte onoff ) {
