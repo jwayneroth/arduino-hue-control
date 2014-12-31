@@ -34,6 +34,10 @@ void apeHueLight() {
 	//Serial.print(" green: ");Serial.print(rgbValues[1]);
 	//Serial.print(" blue: ");Serial.println(rgbValues[2]);
 	
+	red = rgbValues[0];
+	green = rgbValues[1];
+	blue = rgbValues[2];
+	
 	setRGB(rgbValues[0], rgbValues[1], rgbValues[2]);
 	
 	brightness = hueBrightness;

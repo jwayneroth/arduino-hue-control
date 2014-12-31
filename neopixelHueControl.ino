@@ -68,9 +68,9 @@ void setup(void) {
 
 	strip.setBrightness(brightness);
 	strip.begin();
-	strip.show(); // Initialize all pixels to 'off'
+	strip.show();
 	
-	//setRGB(red,green,blue);
+	setRGB(red,green,blue); //start pixels white
 	
 	initButtons();
 	
