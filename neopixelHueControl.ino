@@ -187,8 +187,10 @@ void checkHueModeChange() {
 void switchHueLightNumber() {
 	if(hueLightNumber == 1) {
 		hueLightNumber = 2;
+		apeHueLight();
 	}else{
 		hueLightNumber = 1;
+		apeHueLight();
 	}
 }
 
