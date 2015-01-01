@@ -103,7 +103,14 @@ void loop(void) {
 				incrementBrightness();
 				break;
 			case 5:
-				if(hueMode == true) switchHueLightNumber();
+				if(hueMode == true) {
+					delay(1000);
+					if (checkButtons() == 5) {
+						toggleHueLight();
+					}else{
+						switchHueLightNumber();
+					}
+				}
 				break;
 			default:
 				break;
@@ -152,6 +159,8 @@ void checkHueModeChange() {
 		if(wifiConnection()) {
 			
 			if( getHueLightStatus() ) {
+				
+				if (hueOn == false) toggleHueLight();
 				
 				delay(100);
 				

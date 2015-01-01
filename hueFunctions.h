@@ -152,19 +152,33 @@ void sendData( Adafruit_CC3000_Client& client, String input, int length, int chu
 */
 boolean getHueLightStatus() {
 	
+	Serial.println();
 	Serial.println("getHueLightStatus");
 	
 	Adafruit_CC3000_Client client = cc3000.connectTCP( HUE_IP , 80);
 		
 	if (client.connected()) {
 
-		client.fastrprint(F("GET "));client.fastrprint(HUE_LIGHT_URL);client.print(hueLightNumber);client.fastrprint(F(" HTTP/1.1\r\n"));
-		client.fastrprint(F("Host: ")); client.fastrprint(HUE_IP_STRING); client.fastrprint(F("\r\n"));
-		client.fastrprint(F("Content-type: application/json\r\n"));
+		client.fastrprint(F("GET "));
+		client.fastrprint(HUE_LIGHT_URL);
+		client.print(hueLightNumber);
+		client.fastrprint(F(" HTTP/1.1\r\n"));
+		
 		client.fastrprint(F("keep-alive\r\n"));
+		
+		client.fastrprint(F("Host: ")); 
+		client.fastrprint(HUE_IP_STRING); 
+		client.fastrprint(F("\r\n"));
+		
+		client.fastrprint(F("Content-type: application/json\r\n"));
 		client.fastrprint(F("\r\n"));
 
-		Serial.println(F("-------------------------------------"));
+		client.fastrprint(F("Content-Length: "));
+		client.println(0);
+		
+		client.fastrprint(F("\r\n"));
+			
+		//Serial.println(F("-------------------------------------"));
 
 		/* Read data until either the connection is closed, or the idle timeout is reached. */ 
 		/*
@@ -205,8 +219,8 @@ boolean getHueLightStatus() {
 				Serial.print("hueOn : ");Serial.println(hueOn);
 				Serial.print("hueBrightness : ");Serial.println(hueBrightness);
 				//Serial.print("hueHue : ");Serial.println(hueHue);
-				Serial.print("hueCIEX : ");Serial.println(hueCIEX);
-				Serial.print("hueCIEY : ");Serial.println(hueCIEY);
+				//Serial.print("hueCIEX : ");Serial.println(hueCIEX);
+				//Serial.print("hueCIEY : ");Serial.println(hueCIEY);
 				
 				while (client.available()) {
 					char c = client.read();
@@ -223,7 +237,7 @@ boolean getHueLightStatus() {
 		client.close();
 
 	} else {
-		Serial.println(F("Connection to Hue failed"));    
+		Serial.println(F("getHueLightStatus : Connection to Hue failed"));    
 		return 0;
 	}
 
@@ -232,47 +246,15 @@ boolean getHueLightStatus() {
 }
 
 /*
- * updateHue
+ * sendHueCommand
 */
-boolean updateHue(int red, int green, int blue, int brightness) {
-	
-	Serial.println("updateHue");
-	
+bool sendHueCommand(String command, int length) {
+
 	Adafruit_CC3000_Client client = cc3000.connectTCP( HUE_IP , 80);
 	
 	if (client.connected()) {
 		while(client.connected()) {
-			
-			float newCIE[2];
-			String hueCommand = "";
-			int commandLength = 0;
-			int cieX;
-			int cieY;
-			
-			calculateXY(red, green, blue, newCIE);
-			
-			//newCIE[0] = 0.9;
-			//newCIE[1] = 0.9;
-			
-			cieX = newCIE[0] * 100;//(newCIE[0] < 1) ? newCIE[0] * 100 : 1;
-			cieY = newCIE[1] * 100;//(newCIE[1] < 1) ? newCIE[1] * 100 : 1;
-			
-			Serial.print("cieX: ");Serial.print(cieX);
-			Serial.print(" cieY: ");Serial.println(cieY);
-
-			hueCommand = hueCommand + "\n{\"xy\":[";
-			hueCommand = (cieX == 100) ? hueCommand + "1" : hueCommand + "0.";
-			hueCommand = hueCommand + String(cieX) + ",";
-			hueCommand = (cieY == 100) ? hueCommand + "1" : hueCommand + "0.";
-			hueCommand = hueCommand + String(cieY) + "],\"bri\":";
-			hueCommand = hueCommand + String(brightness) + "}";
-			
-			Serial.println(hueCommand);
-			
-			commandLength = hueCommand.length();
-			
-			Serial.print("commandLength: ");Serial.println(commandLength);
-			
+	
 			client.fastrprint(F("PUT "));
 			client.fastrprint(HUE_LIGHT_URL);
 			client.print(hueLightNumber);
@@ -286,13 +268,13 @@ boolean updateHue(int red, int green, int blue, int brightness) {
 			client.fastrprint(F("\r\n"));
 			
 			client.fastrprint(F("Content-Length: "));
-			client.println(commandLength);
+			client.println(length);
 			
 			client.fastrprint(F("Content-type: text/plain;charset=UTF-8\r\n"));
 			
 			client.fastrprint(F("\r\n"));
 			
-			sendData(client, hueCommand, commandLength, 20);
+			sendData(client, command, length, 20);
 			
 			break;
 			
@@ -313,9 +295,72 @@ boolean updateHue(int red, int green, int blue, int brightness) {
 		client.close();
 		return true;
 	} else {
-		Serial.println(F("Connection to Hue failed"));    
+		Serial.println(F("sendHueCommand : Connection to Hue failed"));    
 		return false;
 	}
+}
+
+/*
+ * updateHue
+*/
+bool updateHue(int red, int green, int blue, int brightness) {
+	
+	Serial.println("updateHue");
+
+	float newCIE[2];
+	String hueCommand = "";
+	int commandLength = 0;
+	int cieX;
+	int cieY;
+	
+	calculateXY(red, green, blue, newCIE);
+	
+	//newCIE[0] = 0.9;
+	//newCIE[1] = 0.9;
+	
+	cieX = newCIE[0] * 100;//(newCIE[0] < 1) ? newCIE[0] * 100 : 1;
+	cieY = newCIE[1] * 100;//(newCIE[1] < 1) ? newCIE[1] * 100 : 1;
+	
+	//Serial.print("cieX: ");Serial.print(cieX);
+	//Serial.print(" cieY: ");Serial.println(cieY);
+
+	hueCommand = hueCommand + "\n{\"xy\":[";
+	hueCommand = (cieX == 100) ? hueCommand + "1" : hueCommand + "0.";
+	hueCommand = hueCommand + String(cieX) + ",";
+	hueCommand = (cieY == 100) ? hueCommand + "1" : hueCommand + "0.";
+	hueCommand = hueCommand + String(cieY) + "],\"bri\":";
+	hueCommand = hueCommand + String(brightness) + "}";
+	
+	//Serial.println(hueCommand);
+	
+	commandLength = hueCommand.length();
+	
+	//Serial.print("commandLength: ");Serial.println(commandLength);
+
+	
+	sendHueCommand(hueCommand, commandLength);
+	
+}
+
+void toggleHueLight( ) {
+	
+	String hueCommand = "";
+	int commandLength = 0;
+		
+	hueCommand = hueCommand + "\n{\"on\":";
+	hueCommand = hueCommand + (hueOn) ? "false" : "true";
+	hueCommand = hueCommand + "}";
+		
+	commandLength = hueCommand.length();
+		
+	if(sendHueCommand(hueCommand, commandLength)) {
+		hueOn *= -1;
+	}else{
+		if(sendHueCommand(hueCommand, commandLength)) {
+			hueOn *= -1;
+		}
+	}
+
 }
 
 /*

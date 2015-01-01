@@ -10,6 +10,13 @@ void solidWhite()
 }
 
 void setRGB(int red, int green, int blue) {
+	
+	Serial.print("setRGB ( ");
+	Serial.print(red);Serial.print(", ");
+	Serial.print(green);Serial.print(", ");
+	Serial.print(blue);
+	Serial.println(")");
+	
 	if(brightness == 0) {
 		brightness = 10;
 		strip.setBrightness(brightness);
