@@ -152,46 +152,18 @@ void sendData( Adafruit_CC3000_Client& client, String input, int length, int chu
 */
 boolean getHueLightStatus() {
 	
-	Serial.println();
-	Serial.println("getHueLightStatus");
+	Serial.println();Serial.println("getHueLightStatus");
 	
 	Adafruit_CC3000_Client client = cc3000.connectTCP( HUE_IP , 80);
 		
 	if (client.connected()) {
 
-		client.fastrprint(F("GET "));
-		client.fastrprint(HUE_LIGHT_URL);
-		client.print(hueLightNumber);
-		client.fastrprint(F(" HTTP/1.1\r\n"));
-		
-		client.fastrprint(F("keep-alive\r\n"));
-		
-		client.fastrprint(F("Host: ")); 
-		client.fastrprint(HUE_IP_STRING); 
-		client.fastrprint(F("\r\n"));
-		
+		client.fastrprint(F("GET "));client.fastrprint(HUE_LIGHT_URL);client.print(hueLightNumber);client.fastrprint(F(" HTTP/1.1\r\n"));
+		client.fastrprint(F("Host: ")); client.fastrprint(HUE_IP_STRING); client.fastrprint(F("\r\n"));
 		client.fastrprint(F("Content-type: application/json\r\n"));
-		client.fastrprint(F("\r\n"));
-
-		client.fastrprint(F("Content-Length: "));
-		client.println(0);
-		
+		client.fastrprint(F("keep-alive\r\n"));
 		client.fastrprint(F("\r\n"));
 			
-		//Serial.println(F("-------------------------------------"));
-
-		/* Read data until either the connection is closed, or the idle timeout is reached. */ 
-		/*
-		unsigned long lastRead = millis();
-		while (client.connected() && (millis() - lastRead < IDLE_TIMEOUT_MS)) {
-			while (client.available()) {
-				char c = client.read();
-				Serial.print(c);
-				lastRead = millis();
-			}
-		}
-		*/
-		///*
 		while(client.connected()) {
 			if(client.available()) {
 				findUntil(client, "\"on\":", "\0");
@@ -249,7 +221,9 @@ boolean getHueLightStatus() {
  * sendHueCommand
 */
 bool sendHueCommand(String command, int length) {
-
+	
+	Serial.println();Serial.print("sendHueCommand: ");Serial.println(command);
+	
 	Adafruit_CC3000_Client client = cc3000.connectTCP( HUE_IP , 80);
 	
 	if (client.connected()) {
@@ -344,22 +318,27 @@ bool updateHue(int red, int green, int blue, int brightness) {
 
 void toggleHueLight( ) {
 	
+	Serial.println();Serial.println("toggleHueLight");
+
 	String hueCommand = "";
 	int commandLength = 0;
 		
 	hueCommand = hueCommand + "\n{\"on\":";
-	hueCommand = hueCommand + (hueOn) ? "false" : "true";
+	hueCommand = (hueOn == true) ? hueCommand + "false" : hueCommand + "true";
 	hueCommand = hueCommand + "}";
 		
 	commandLength = hueCommand.length();
-		
+	
 	if(sendHueCommand(hueCommand, commandLength)) {
-		hueOn *= -1;
+		hueOn  = (hueOn) ? false : true;
 	}else{
 		if(sendHueCommand(hueCommand, commandLength)) {
-			hueOn *= -1;
+			hueOn = (hueOn) ? false : true;
 		}
 	}
+	
+	Serial.println("hueOn: ");Serial.println(hueOn);
+	
 
 }
 

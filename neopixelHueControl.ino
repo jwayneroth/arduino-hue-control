@@ -107,6 +107,7 @@ void loop(void) {
 					delay(1000);
 					if (checkButtons() == 5) {
 						toggleHueLight();
+						delay(1000);
 					}else{
 						switchHueLightNumber();
 					}
@@ -200,7 +201,7 @@ void checkHueModeChange() {
 
 void switchHueLightNumber() {
 	
-	Serial.print("switchHueLightNumber ");
+	Serial.println();Serial.print("switchHueLightNumber ");
 	
 	if(hueLightNumber == 1) {
 		hueLightNumber = 2;
