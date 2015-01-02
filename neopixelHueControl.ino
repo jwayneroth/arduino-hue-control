@@ -214,7 +214,9 @@ void switchHueLightNumber() {
 	setBusyLED(1);
 		
 	if( getHueLightStatus() ) {
-			
+		
+		if (hueOn == false) toggleHueLight();
+		
 		delay(100);
 			
 		apeHueLight();
@@ -223,8 +225,10 @@ void switchHueLightNumber() {
 			
 		setErrorLED(1);
 		
-		//try again please (this is a cruddy fix)
+		//try again please (this is a cruddy fix :( )
 		if( getHueLightStatus() ) {
+			
+			if (hueOn == false) toggleHueLight();
 			
 			delay(100);
 			
